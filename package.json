@@ -1,0 +1,14 @@
+{
+  "name": "reddit-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "start": "ts-node src/index.ts"
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
