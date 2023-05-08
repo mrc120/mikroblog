@@ -7,21 +7,51 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import * as redis from 'redis';
+import connectRedis from "connect-redis";
+import session from 'express-session';
+// import cors from "cors";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up;
 
   const app = express();
+  app.set('trust proxy', process.env.NODE_ENV !== 'production')
+
+
+  const RediStore = connectRedis(session);
+  const redisClient = redis.createClient();
+
+  const redisStore = new RediStore({
+    client: redisClient,
+    disableTouch: true,
+  })
+
+  app.use(
+    session({
+      name: "qid",
+      store: redisStore,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
+        httpOnly: true,
+        sameSite: "lax",
+        secure: __prod__
+      },
+      secret: '31632623163262',
+      resave: false,
+      saveUninitialized: false,
+    })
+  )
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em })
+    context: ({req, res}) => ({ em: orm.em, req, res })
   });
-  
+
   async function startServer() {
     await apolloServer.start();
     apolloServer.applyMiddleware({ app });
@@ -36,15 +66,3 @@ const main = async () => {
 main().catch((err) => {
   console.log(err);
 });
-//   const post = orm.em.create(Post, {
-//     title: "John Snow",
-//     createdAt: "02-02-2022",
-//     updatedAt: "02-02-2022",
-//   });
-//   await orm.em.persistAndFlush(post);
-//   console.log("-----sql2-----");
-//   orm.em.persist(post);
-//   const posts = await orm.em.find(Post, {});
-//   console.log(posts);
-
-//   await orm.em.nativeInsert(Post, { title: "pierwszy post" });
