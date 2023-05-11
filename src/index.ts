@@ -36,7 +36,7 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true,
         sameSite: "lax",
-        secure: __prod__
+        secure: true
       },
       secret: '31632623163262',
       resave: false,
@@ -49,6 +49,7 @@ const main = async () => {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
+    
     context: ({req, res}) => ({ em: orm.em, req, res })
   });
 
