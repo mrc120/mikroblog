@@ -7,18 +7,16 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import {createClient} from 'redis';
+import { createClient } from 'redis';
 import connectRedis from "connect-redis";
 import session from 'express-session';
 import cors from "cors";
+import { MyContext } from "./Types";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up;
-
   const app = express();
-
-
   const RediStore = connectRedis(session);
   const redisClient = createClient({ legacyMode: true });
   const redisStore = new RediStore({
@@ -30,12 +28,11 @@ const main = async () => {
   await redisClient.connect();
 
 
-
+  app.set('trust proxy', 1)
   app.use(cors({
-    origin: ' ttps://studio.apollographql.com',
+    origin: ["http://localhost:4000", "https://studio.apollographql.com"],
     credentials: true
   }));
-  app.set('trust proxy', process.env.NODE_ENV !== 'production')
 
   app.use(
     session({
@@ -44,14 +41,20 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true,
-        sameSite: 'lax',
-        secure: true
+        sameSite: "none",
+        secure: true,
+     
       },
       secret: '31632623163262',
       resave: false,
       saveUninitialized: false,
     })
   )
+  // app.get("/", (req, res) => {
+  //   res.send(req.session.userId);
+  //   console.log(req.session.userId);
+  //   console.log("hello world");
+  // });
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
@@ -63,7 +66,10 @@ const main = async () => {
 
   async function startServer() {
     await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({
+      app,
+      cors: false,
+    });
   }
   startServer();
 

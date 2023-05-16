@@ -23,7 +23,7 @@ export class UsernamePasswordInput {
 
 declare module 'express-session' {
   interface Session {
-      userId: number;
+    userId: number;
   }
 }
 
@@ -49,21 +49,20 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(@Ctx() { req, em }: MyContext) {
+  async me(
+    @Ctx() { req, em }: MyContext) {
+      console.log("Session: ", req.session)
     if (!req.session.userId) {
       return null;
     }
-    const user = await em.findOne(User, {id: req.session.userId});
+    const user = await em.findOne(User, { id: req.session.userId });
     return user;
   }
-  
-
-
 
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     if (options.username.length <= 2) {
       return {
@@ -95,6 +94,10 @@ export class UserResolver {
     } catch (err) {
       console.log("message", err.message);
     }
+
+    req.session.userId = user.id;
+    console.log(req.session.userId + " ->> userId reg")
+    console.log(user.id + "<-- ID")
     return { user };
   }
 
@@ -125,9 +128,8 @@ export class UserResolver {
         ],
       };
     }
-
-
     req.session.userId = user.id;
+    console.log(req.session.userId + "<-- session id")
     return { user };
   }
 }
