@@ -27,13 +27,6 @@ const main = async () => {
   redisClient.on('error', (err) => console.log('Redis Client Error', err));
   await redisClient.connect();
 
-
-  app.set('trust proxy', 1)
-  app.use(cors({
-    origin: ["http://localhost:4000", "https://studio.apollographql.com"],
-    credentials: true
-  }));
-
   app.use(
     session({
       name: "qid",
@@ -41,7 +34,8 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true,
-        sameSite: "none",
+        path: '/graphql',
+        sameSite: 'none',
         secure: true,
      
       },
@@ -50,11 +44,19 @@ const main = async () => {
       saveUninitialized: false,
     })
   )
-  // app.get("/", (req, res) => {
-  //   res.send(req.session.userId);
-  //   console.log(req.session.userId);
-  //   console.log("hello world");
-  // });
+
+  
+  app.set('trust proxy', 1)
+  app.use(cors({
+    origin: ["http://localhost:4000/graphql", "http://localhost:4000/graphql", "https://studio.apollographql.com"],
+    credentials: true
+  }));
+
+  app.get("/", (req, res) => {
+    res.send(req.session.userId);
+    console.log(req.session.userId);
+    console.log("hello world");
+  });
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
