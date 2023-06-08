@@ -11,8 +11,8 @@ export default {
     },
     entities: [Post, User],
     allowGlobalContext: true,
+    type: "postgresql",
     dbName: "mirkodb",
     password: "123qwe",
-    type: "postgresql",
-    debug: __prod__,
+    debug: true,
 } as Parameters<typeof MikroORM.init>[0];

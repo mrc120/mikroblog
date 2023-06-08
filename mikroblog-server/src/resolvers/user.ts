@@ -6,9 +6,9 @@ import {
   Mutation,
   Ctx,
   ObjectType,
-  Query
+  Query,
 } from "type-graphql";
-import { RequiredEntityData } from "@mikro-orm/core";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { MyContext } from "../Types";
 import { User } from "../entities/User";
 import argon2 from "argon2";
@@ -21,7 +21,7 @@ export class UsernamePasswordInput {
   password: string;
 }
 
-declare module 'express-session' {
+declare module "express-session" {
   interface Session {
     userId: number;
   }
@@ -49,9 +49,8 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(
-    @Ctx() { req, em }: MyContext) {
-      console.log("Session: ", req.session)
+  async me(@Ctx() { req, em }: MyContext) {
+    console.log("Session: ", req.session);
     if (!req.session.userId) {
       return null;
     }
@@ -85,19 +84,35 @@ export class UserResolver {
       };
     }
     const hashedPassword = await argon2.hash(options.password);
-    const user = em.create(User, {
-      username: options.username,
-      password: hashedPassword,
-    } as RequiredEntityData<User>);
-    try {
-      await em.persistAndFlush(user);
-    } catch (err) {
-      console.log("message", err.message);
-    }
 
+    let user;
+    try {
+      const result = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          username: options.username,
+          password: hashedPassword,
+          created_At: new Date(),
+          updated_At: new Date(),
+        })
+        .returning("*");
+     console.log( user = result[0]);
+    } catch (err) {
+      //|| err.detail.includes("already exists")) {
+      // duplicate username error
+      if (err.code === "23505") {
+        return {
+          errors: [
+            {
+              field: "username",
+              message: "username already taken",
+            },
+          ],
+        };
+      }
+    }
     req.session.userId = user.id;
-    console.log(req.session.userId + " ->> userId reg")
-    console.log(user.id + "<-- ID")
     return { user };
   }
 
@@ -129,7 +144,6 @@ export class UserResolver {
       };
     }
     req.session.userId = user.id;
-    console.log(req.session.userId + "<-- session id")
     return { user };
   }
 }

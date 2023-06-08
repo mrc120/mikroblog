@@ -1,17 +1,16 @@
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
-//import { Post } from "./entities/Post";
 import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import { createClient } from 'redis';
+import { createClient } from "redis";
 import connectRedis from "connect-redis";
-import session from 'express-session';
+import session from "express-session";
 import cors from "cors";
-import { MyContext } from "./Types";
+import { PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -22,9 +21,9 @@ const main = async () => {
   const redisStore = new RediStore({
     client: redisClient,
     disableTouch: true,
-  })
+  });
   // console.log(process.env)
-  redisClient.on('error', (err) => console.log('Redis Client Error', err));
+  redisClient.on("error", (err) => console.log("Redis Client Error", err));
   await redisClient.connect();
 
   app.use(
@@ -34,28 +33,30 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, //10 years
         httpOnly: true,
-        path: '/graphql',
-        sameSite: 'none',
+        path: "/graphql",
+        sameSite: "none",
         secure: true,
-     
       },
-      secret: '31632623163262',
+      secret: "31632623163262",
       resave: false,
       saveUninitialized: false,
     })
-  )
+  );
 
-  
-  app.set('trust proxy', 1)
-  app.use(cors({
-    origin: ["http://localhost:4000/graphql", "http://localhost:4000/graphql", "https://studio.apollographql.com"],
-    credentials: true
-  }));
+  app.set("trust proxy", 1);
+  app.use(
+    cors({
+      origin: [
+        "http://localhost:4000/graphql",
+        "https://studio.apollographql.com",
+        "http://localhost:3000",
+      ],
+      credentials: true,
+    })
+  );
 
   app.get("/", (req, res) => {
     res.send(req.session.userId);
-    console.log(req.session.userId);
-    console.log("hello world");
   });
 
   const apolloServer = new ApolloServer({
@@ -63,7 +64,7 @@ const main = async () => {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res })
+    context: ({ req, res }) => ({ em: orm.em, req, res }),
   });
 
   async function startServer() {
