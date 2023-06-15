@@ -93,8 +93,8 @@ export class UserResolver {
         .insert({
           username: options.username,
           password: hashedPassword,
-          created_At: new Date(),
-          updated_At: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
         })
         .returning("*");
      console.log( user = result[0]);

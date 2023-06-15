@@ -14,5 +14,6 @@ export default {
     type: "postgresql",
     dbName: "mirkodb",
     password: "123qwe",
+    logger: console.log.bind(console),
     debug: true,
 } as Parameters<typeof MikroORM.init>[0];
