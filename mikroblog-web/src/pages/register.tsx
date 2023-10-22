@@ -1,11 +1,13 @@
 import React from 'react'
 import { Formik, Form } from 'formik'
-import {Box, Button } from "@chakra-ui/react"
+import { Box, Button } from "@chakra-ui/react"
 import { Wrapper } from "../components/Wrapper"
 import { InputField } from "../components/InputField";
 import { useRegisterMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/ToErrorMap';
 import { useRouter } from 'next/router';
+import { withUrqlClient } from 'next-urql';
+import { createUrqlClient } from '../utils/createUrqlClient';
 
 interface registerProps {
 
@@ -17,10 +19,10 @@ const Register: React.FC<registerProps> = ({ }) => {
     return (
         <Wrapper>
             <Formik
-                initialValues={{ username: '', password: "" }}
+                initialValues={{ email: "", username: '', password: "" }}
                 onSubmit={async (values, { setErrors }) => {
                     console.log(values)
-                    const response = await register(values);
+                    const response = await register({ options: values });
                     [{ field: 'username', message: 'imerror' }]
                     if (response.data?.register.errors) {
                         setErrors(toErrorMap(response.data.register.errors));
@@ -35,6 +37,13 @@ const Register: React.FC<registerProps> = ({ }) => {
                             label="username"
                             placeholder="username"
                         />
+                        <Box mt={5}>
+                            <InputField
+                                name="email"
+                                label="email"
+                                placeholder="email"
+                            />
+                        </Box>
                         <Box mt={5}>
                             <InputField
                                 name="password"
@@ -54,4 +63,4 @@ const Register: React.FC<registerProps> = ({ }) => {
         </Wrapper>
     );
 }
-export default Register
+export default withUrqlClient(createUrqlClient)(Register)

@@ -2,20 +2,25 @@ import { RequiredEntityData } from "@mikro-orm/core";
 // import { rejects } from "assert";
 import { Resolver, Query, Ctx, Arg, Mutation } from "type-graphql";
 import { Post } from "../entities/Post";
-import { MyContext } from "../Types";
+import { MyContext } from "../types";
+import { sleep } from "../utils/sleep";
 
-
+//get post
 @Resolver()
 export class PostResolver {
-  posts(@Ctx() { em }: MyContext): Promise<Post[]> {
+  @Query(() => [Post])
+  async posts(@Ctx() { em }: MyContext): Promise<Post[]> {
     return em.find(Post, {});
   }
 
+
+  // get post id 
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number, @Ctx() { em }: MyContext): Promise<Post | null> {
     return em.findOne(Post, { id });
   }
 
+  // create post
   @Mutation(() => Post)
   //uniq nazwa
   async createPost(
@@ -29,8 +34,8 @@ export class PostResolver {
     return post;
   }
 
+  //udate post 
   @Mutation(() => Post)
-  //uniq nazwa
   async updatePost(
     @Arg("id") id: number,
     @Arg("title", () => String, { nullable: true }) title: string,
@@ -47,14 +52,14 @@ export class PostResolver {
     return post;
   }
 
+  //delete post
   @Mutation(() => Boolean)
-  //uniq nazwa
   async deletePost(
     @Arg("id") id: number,
     @Ctx() { em }: MyContext
   ): Promise<boolean> {
-      await em.nativeDelete(Post, {id});
-      return true;
-    }
+    await em.nativeDelete(Post, { id });
+    return true;
   }
+}
 

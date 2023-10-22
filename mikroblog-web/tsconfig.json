@@ -31,7 +31,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "../mikroblog-server/src/utils/sleep.ts"  ],
   "exclude": [
     "node_modules"
   ]
