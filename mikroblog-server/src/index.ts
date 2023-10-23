@@ -13,7 +13,7 @@ import cors from "cors";
 import { sendEmail } from "./utils/sendEmail"
 const main = async () => {
    
-  sendEmail("bob@bob.com", "hello")
+  // sendEmail("bob@bob.com", "hello")
   const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up;
   const app = express();
@@ -48,8 +48,9 @@ const main = async () => {
   app.set("trust proxy", 1);
   app.use(
     cors({
-      origin: '*',        
+      origin: 'http://localhost:3000',        
       credentials: true,
+      
     })
   );
 
