@@ -23,7 +23,6 @@ const ForgotPassword: React.FC<{}> = ({ }) => {
                     complete ?
                         <Box>
                             Jeśli konto z tym adresem email istnieje to wyślemy Ci wiadomość na ten adres
-
                         </Box>
                         : (
                             <Form>

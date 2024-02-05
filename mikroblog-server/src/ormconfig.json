@@ -4,7 +4,7 @@
     "port": 5432,
     "username": "postgres",
     "password": "123qwe",
-    "database": "mirkodb",
-    "entities": ["dist/entities/*.js"],
+    "database": "mirkodb2",
+    "entities": ["dist/entities/*.ts"],
     "migrations": ["dist/migrations/*.js"]
 }
