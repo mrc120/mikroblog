@@ -31,7 +31,7 @@ const main = async () => {
   const redis = new Redis();
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: ["*", "https://studio.apollographql.com"],
       credentials: true ,
     })
   );
@@ -45,10 +45,10 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
-        sameSite: "lax", // csrf
-        secure: __prod__, // cookie only works in https
+        sameSite: "none", // csrf
+        secure: true, // cookie only works in https
       },
-      saveUninitialized: false,
+      saveUninitialized: true,
       secret: "qowiueojwojfalksdjoqiwueo",
       resave: false,
     })
@@ -58,6 +58,7 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [PostResolver, UserResolver],
       validate: false,
+      
     }), 
     context: ({ req, res }) => ({ req, res, redis }),
   });
@@ -65,8 +66,9 @@ const main = async () => {
 
    apolloServer.applyMiddleware({
     app,
-    cors: false,
+    cors: true,
   });
+  app.set('trust proxy', process.env.NODE_ENV !== 'production')
 
   app.listen(4000, () => {
     console.log("Server started on localhost:4000");

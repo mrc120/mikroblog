@@ -133,10 +133,10 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: MyContext) {
     // you are not logged in
-    // if (!req.session.userId) {
-    //   console.log("id", req.session.userId)
-    //   return null;
-    // }
+    if (!req.session.userId) {
+      console.log("id", req.session.userId)
+      return null;
+    }
     console.log("id", req.session.userId)
 
     const user = await User.findOne({

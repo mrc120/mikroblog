@@ -2,6 +2,7 @@
 import { Resolver, Query, Ctx, Arg, Mutation, Field, InputType, UseMiddleware } from "type-graphql";
 import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
+import { isAuth } from "../middleware/isAuth";
 // import { isAuth } from "src/middleware/isAuth";
 
 
@@ -20,7 +21,6 @@ export class PostResolver {
     return Post.find();
   }
 
-
   // get post id 
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | null> {
@@ -30,15 +30,11 @@ export class PostResolver {
 
   // create post
   @Mutation(() => Post)
-  //uniq nazwa
+  @UseMiddleware(isAuth)
   async createPost(
     @Arg("input") input: PostInput,
-    @Ctx() { req }: MyContext
+    @Ctx() { req }: MyContext,
   ): Promise<Post> {
-    //   if(!req.session.userId){
-    //   throw new Error("Brak identyfikacji")
-    // }
-    console.log("id: ", req.session.userId)
     return Post.create({
       ...input,
       creatorId: req.session.userId
