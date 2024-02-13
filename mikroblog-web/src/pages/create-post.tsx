@@ -3,9 +3,7 @@ import { Wrapper } from '../components/Wrapper';
 
 export const CreatePost: React.FC<{}> = ({ }) => {
     return (
-        <Wrapper variant='small'>
+        <Wrap variant='small'>
 
 
-        </Wrapper>
-    );
-}
+        </Wrap"></div>
