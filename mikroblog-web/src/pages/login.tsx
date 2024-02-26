@@ -22,33 +22,37 @@ const Login: React.FC<{}> = ({ }) => {
                     if (response.data?.login.errors) {
                         setErrors(toErrorMap(response.data.login.errors));
                     } else if (response.data?.login.user) {
-                        router.push("/")
+                        // worked
+                        router.push("/");
                     }
-                }}>
+                }}
+            >
                 {({ isSubmitting }) => (
                     <Form>
                         <InputField
                             name="usernameOrEmail"
-                            label="Podaj nazwę użytkownika lub hasło"
-                            placeholder="Podaj nazwę użytkownika lub hasło"
+                            placeholder="username or email"
+                            label="Username or Email"
                         />
-                        <Box mt={5}>
+                        <Box mt={4}>
                             <InputField
                                 name="password"
-                                label="password"
                                 placeholder="password"
+                                label="Password"
+                                type="password"
                             />
                         </Box>
-                        <Flex mt="2">
+                        <Flex mt={2}>
                             <NextLink href="/forgot-password">
-                                <Link ml="auto">Przypomnij hasło</Link>
+                                <Link ml="auto">forgot password?</Link>
                             </NextLink>
                         </Flex>
                         <Button
                             mt={4}
                             type="submit"
                             isLoading={isSubmitting}
-                            variant="teal"> Login
+                            >
+                            login
                         </Button>
                     </Form>
                 )}

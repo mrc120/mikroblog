@@ -3,7 +3,6 @@ import { Resolver, Query, Ctx, Arg, Mutation, Field, InputType, UseMiddleware } 
 import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
-// import { isAuth } from "src/middleware/isAuth";
 
 
 @InputType()
